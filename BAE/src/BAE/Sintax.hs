@@ -5,7 +5,7 @@ El lenguaje EAB (Sintaxis)
 Autora: Sandra del Mar Soto Corderi
 --}
 
-module Sintax where
+module BAE.Sintax where
   --Importamos las funciones de data list
   import Data.List
 
@@ -31,9 +31,9 @@ module Sintax where
           (B b) -> "B[" ++ (show b) ++ "]"
           (Add e1 e2) -> "SUMA["++ (show e1) ++ " , " ++ (show e2) ++ "]"
           (Mul e1 e2) -> "PROD["++ (show e1) ++ " , " ++ (show e2) ++ "]"
-          (Succ e) -> "S[" ++ (show e) ++ "]"
-          (Pred e) -> "P[" ++ (show e) ++ "]"
-          (Not e) -> "NOT[" ++ (show e) ++ "]"
+          (Succ e1) -> "S[" ++ (show e1) ++ "]"
+          (Pred e1) -> "P[" ++ (show e1) ++ "]"
+          (Not e1) -> "NOT[" ++ (show e1) ++ "]"
           (And e1 e2) -> "&["++ (show e1) ++ " , " ++ (show e2) ++ "]"
           (Or e1 e2) -> "|["++ (show e1) ++ " , " ++ (show e2) ++ "]"
           (Lt e1 e2) -> "<["++ (show e1) ++ " , " ++ (show e2) ++ "]"
@@ -54,9 +54,9 @@ module Sintax where
           (B _) -> []
           (Add e1 e2) -> union (frVars e1) (frVars e2)
           (Mul e1 e2) -> union (frVars e1) (frVars e2)
-          (Succ e)-> frVars e
-          (Pred e)-> frVars e
-          (Not e)-> frVars e
+          (Succ e1)-> frVars e1
+          (Pred e1)-> frVars e1
+          (Not e1)-> frVars e1
           (And e1 e2) -> union (frVars e1) (frVars e2)
           (Or e1 e2) -> union (frVars e1) (frVars e2)
           (Lt e1 e2) -> union (frVars e1) (frVars e2)
@@ -69,8 +69,8 @@ module Sintax where
 --3. Función que aplica la sustitución a la expresión dada en caso de ser posible
   subst :: Expr -> Substitution -> Expr
   subst (V x) (y, e) = if x==y then e else V x
-  subst (I n) sus = I n
-  subst (B b) sus = B b
+  subst (I n) _ = I n
+  subst (B b) _ = B b
   subst (Add e1 e2) sus = Add (subst e1 sus) (subst e2 sus)
   subst (Mul e1 e2) sus = Mul (subst e1 sus) (subst e2 sus)
   subst (Succ e) sus = Succ (subst e sus)
@@ -134,8 +134,8 @@ module Sintax where
   --Función que renombra las variables de una expresión
   renombra :: String -> String -> Expr -> Expr
   renombra sus1 sus2 (V x) = if x == sus1 then (V sus2) else V x
-  renombra sus1 sus2 (I n) = I n
-  renombra sus1 sus2 (B b) = B b
+  renombra _ _ (I n) = I n
+  renombra _ _ (B b) = B b
   renombra sus1 sus2 (Add e1 e2) = Add (renombra sus1 sus2 e1) (renombra sus1 sus2 e2)
   renombra sus1 sus2 (Mul e1 e2) = Mul (renombra sus1 sus2 e1) (renombra sus1 sus2 e2)
   renombra sus1 sus2 (Succ e) = Succ (renombra sus1 sus2 e)
