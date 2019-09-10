@@ -1,0 +1,187 @@
+% document type
+\documentclass{article}
+
+% format
+\usepackage[letterpaper, margin = 1.5cm]{geometry}
+
+% trees
+\usepackage{ebproof}
+
+% placement
+\usepackage{float}
+
+% header
+\title {
+    Práctica 2 \\
+    El lenguaje \texttt{EAB} \\
+    Semántica
+}
+
+\author {
+    Sandra del Mar Soto Corderi \\
+    Edgar Quiroz Castañeda
+}
+
+\date {
+    11 de septiembre del 2019
+}
+
+\begin{document}
+    \section{Semántica Dinámica}
+    Define la semántica dinámica de los operadores booleanos y las relaciones.
+
+    Para los operadores booleanos
+
+    \begin{figure}[H]
+        \centering
+
+        \begin{prooftree}
+            \infer 0 {not(bool[p]) \rightarrow bool[!p]}
+        \end{prooftree}
+        \qquad
+        \begin{prooftree}
+            \hypo{e \rightarrow e'}
+            \infer 1 {not(e) \rightarrow not(e')}
+        \end{prooftree}
+        \\ \bigskip
+
+        \begin{prooftree}
+            \infer 0 {and(bool[v_1], bool[v_2]) \rightarrow bool[v_1\&\&b_2]}
+        \end{prooftree}
+        \qquad
+        \begin{prooftree}
+            \hypo{e_1 \rightarrow e_1'}
+            \infer 1 {and(e_1, e_2) \rightarrow and(e_1', e_2)}
+        \end{prooftree}
+        \qquad
+        \begin{prooftree}
+            \hypo{e_2 \rightarrow e_2'}
+            \infer 1 {and(v, e_2) \rightarrow and(v, e_2')}
+        \end{prooftree}
+        \\ \bigskip
+
+        \begin{prooftree}
+            \infer 0 {or(bool[v_1], bool[v_2]) \rightarrow bool[v_1||b_2]}
+        \end{prooftree}
+        \qquad
+        \begin{prooftree}
+            \hypo{e_1 \rightarrow e_1'}
+            \infer 1 {or(e_1, e_2) \rightarrow or(e_1', e_2)}
+        \end{prooftree}
+        \qquad
+        \begin{prooftree}
+            \hypo{e_2 \rightarrow e_2'}
+            \infer 1 {or(v, e_2) \rightarrow or(v, e_2')}
+        \end{prooftree}
+        \caption{Semántica dinámica de los operadores booleanos}
+        \label{fig:semd_bool}
+    \end{figure}
+
+    Para las relaciones
+
+    \begin{figure}[H]
+        \centering
+
+        \begin{prooftree}
+            \infer 0 {lt(n[v_1], n[v_2]) \rightarrow bool[v_1<b_2]}
+        \end{prooftree}
+        \qquad
+        \begin{prooftree}
+            \hypo{e_1 \rightarrow e_1'}
+            \infer 1 {lt(e_1, e_2) \rightarrow lt(e_1', e_2)}
+        \end{prooftree}
+        \qquad
+        \begin{prooftree}
+            \hypo{e_2 \rightarrow e_2'}
+            \infer 1 {lt(v, e_2) \rightarrow lt(v, e_2')}
+        \end{prooftree}
+        \\ \bigskip
+
+        \begin{prooftree}
+            \infer 0 {gt(n[v_1], n[v_2]) \rightarrow bool[v_1>b_2]}
+        \end{prooftree}
+        \qquad
+        \begin{prooftree}
+            \hypo{e_1 \rightarrow e_1'}
+            \infer 1 {gt(e_1, e_2) \rightarrow gt(e_1', e_2)}
+        \end{prooftree}
+        \qquad
+        \begin{prooftree}
+            \hypo{e_2 \rightarrow e_2'}
+            \infer 1 {gt(v, e_2) \rightarrow gt(v, e_2')}
+        \end{prooftree}
+        \\ \bigskip
+
+        \begin{prooftree}
+            \infer 0 {eq(n[v_1], n[v_2]) \rightarrow bool[v_1==b_2]}
+        \end{prooftree}
+        \qquad
+        \begin{prooftree}
+            \hypo{e_1 \rightarrow e_1'}
+            \infer 1 {eq(e_1, e_2) \rightarrow eq(e_1', e_2)}
+        \end{prooftree}
+        \qquad
+        \begin{prooftree}
+            \hypo{e_2 \rightarrow e_2'}
+            \infer 1 {eq(v, e_2) \rightarrow eq(v, e_2')}
+        \end{prooftree}
+        \caption{Semántica dinámica de los operadores relacionales}
+        \label{fig:semd_rel}
+    \end{figure}
+
+    \section{Semántica Estática}
+    Define la semántica estática de los operadores booleanos y las relaciones.
+
+    Para las operaciones booleanas.
+
+    \begin{figure}[H]
+        \centering
+
+        \begin{prooftree}
+            \hypo{\Gamma \vdash t : Bool}
+            \infer 1 {\Gamma \vdash not(t) : Bool}
+        \end{prooftree}
+        \qquad
+        \begin{prooftree}
+            \hypo{\Gamma \vdash t_1 : Bool}
+            \hypo{\Gamma \vdash t_2 : Bool}
+            \infer 2 {\Gamma \vdash and(t_1, t_2) : Bool}
+        \end{prooftree}
+        \qquad
+        \begin{prooftree}
+            \hypo{\Gamma \vdash t_1 : Bool}
+            \hypo{\Gamma \vdash t_2 : Bool}
+            \infer 2 {\Gamma \vdash or(t_1, t_2) : Bool}
+        \end{prooftree}
+        \caption{Semántica estática de los operadores booleanos}
+        \label{fig:seme_bool}
+    \end{figure}
+
+    Para las operaciones de relación.
+
+    \begin{figure}[H]
+        \centering
+
+        \begin{prooftree}
+            \hypo{\Gamma \vdash t_1 : Nat}
+            \hypo{\Gamma \vdash t_2 : Nat}
+            \infer 2 {\Gamma \vdash lt(t_1, t_2) : Bool}
+        \end{prooftree}
+        \qquad
+        \begin{prooftree}
+            \hypo{\Gamma \vdash t_1 : Nat}
+            \hypo{\Gamma \vdash t_2 : Nat}
+            \infer 2 {\Gamma \vdash gt(t_1, t_2) : Bool}
+        \end{prooftree}
+        \qquad
+        \begin{prooftree}
+            \hypo{\Gamma \vdash t_1 : Nat}
+            \hypo{\Gamma \vdash t_2 : Nat}
+            \infer 2 {\Gamma \vdash eq(t_1, t_2) : Bool}
+        \end{prooftree}
+        \caption{Semántica estática de los operadores booleanos}
+        \label{fig:seme_rel}
+    \end{figure}
+
+
+\end{document}
