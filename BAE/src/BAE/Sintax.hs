@@ -1,155 +1,172 @@
-
 {--
-Semanal 1
+Practica 2
 El lenguaje EAB (Sintaxis)
-Autora: Sandra del Mar Soto Corderi
+Autores:
+Edgar Quiroz Castañeda
+Sandra del Mar Soto Corderi
 --}
 
 module BAE.Sintax where
-  --Importamos las funciones de data list
-  import Data.List
 
-  --Renombramos el tipo de daros String a Identifier para representar al conjunto
-  --de nombres de variables como cadenas de texto
-  type Identifier = String
+    -- Importing some useful list functions
+    import Data.List
 
-  --Definimos la sintaxis de las expresiones EAB
-  data Expr = V Identifier | I Int | B Bool
-              | Add Expr Expr | Mul Expr Expr
-              | Succ Expr | Pred Expr
-              | Not Expr | And Expr Expr | Or Expr Expr
-              | Lt Expr Expr | Gt Expr Expr | Eq Expr Expr
-              | If Expr Expr Expr
-              | Let Identifier Expr Expr deriving (Eq)
+    -- Extending the sintax
 
---1. Crea una instancia de la clase Show que muestre las expresiones en sintaxis
---abstracta de orden superior.
-  instance Show Expr where
-    show e = case e of
-          (V x) -> "V[" ++ x ++ "]"
-          (I n) -> "N[" ++ (show n) ++ "]"
-          (B b) -> "B[" ++ (show b) ++ "]"
-          (Add e1 e2) -> "SUMA["++ (show e1) ++ " , " ++ (show e2) ++ "]"
-          (Mul e1 e2) -> "PROD["++ (show e1) ++ " , " ++ (show e2) ++ "]"
-          (Succ e1) -> "S[" ++ (show e1) ++ "]"
-          (Pred e1) -> "P[" ++ (show e1) ++ "]"
-          (Not e1) -> "NOT[" ++ (show e1) ++ "]"
-          (And e1 e2) -> "&["++ (show e1) ++ " , " ++ (show e2) ++ "]"
-          (Or e1 e2) -> "|["++ (show e1) ++ " , " ++ (show e2) ++ "]"
-          (Lt e1 e2) -> "<["++ (show e1) ++ " , " ++ (show e2) ++ "]"
-          (Gt e1 e2) -> ">["++ (show e1) ++ " , " ++ (show e2) ++ "]"
-          (Eq e1 e2) -> "=["++ (show e1) ++ " , " ++ (show e2) ++ "]"
-          (If x e1 e2) -> "IF["++ (show x) ++ " , " ++ (show e1) ++ " , "
-                         ++ (show e2) ++ "]"
-          (Let x e1 e2) -> "LET[" ++ (show e1) ++ " , " ++ (show x) ++ "." ++ (show e2) ++ "]"
+    -- | Renaming String to Identifier in order to use text as variables' name.
+    type Identifier = String
 
---Definiremos el tipo sustitución del siguiente modo∷
-  type Substitution = (Identifier, Expr)
+    -- | Defining the expresions of the language. Same as before, but now with
+    -- variables
+    data Expr = V Identifier | I Int | B Bool -- ^ Basic expresions
+                | Add Expr Expr | Mul Expr Expr -- ^ Binary arithmetic operations
+                | Succ Expr | Pred Expr -- ^ Unary arithmetic operations
+                | Not Expr | And Expr Expr | Or Expr Expr -- ^ Logical operations
+                | Lt Expr Expr | Gt Expr Expr | Eq Expr Expr -- ^ Comparaison operations
+                | If Expr Expr Expr -- ^ If operation
+                | Let Identifier Expr Expr -- ^ Variable declaration and bounding operation
+                deriving (Eq)
 
---2. Función que obtiene el conjunto de variables libres de una expresión
-  frVars :: Expr -> [Identifier]
-  frVars e =  case e of
-          (V x) -> [x]
-          (I _) -> []
-          (B _) -> []
-          (Add e1 e2) -> union (frVars e1) (frVars e2)
-          (Mul e1 e2) -> union (frVars e1) (frVars e2)
-          (Succ e1)-> frVars e1
-          (Pred e1)-> frVars e1
-          (Not e1)-> frVars e1
-          (And e1 e2) -> union (frVars e1) (frVars e2)
-          (Or e1 e2) -> union (frVars e1) (frVars e2)
-          (Lt e1 e2) -> union (frVars e1) (frVars e2)
-          (Gt e1 e2) -> union (frVars e1) (frVars e2)
-          (Eq e1 e2) -> union (frVars e1) (frVars e2)
-          (If x e1 e2) -> union (union (frVars e1) (frVars e2)) (frVars x)
-          --Quitamos las variables ligadas al let
-          (Let x e1 e2) -> union (frVars e1) ((frVars e2) \\ [x])
+    -- | Implementing the Show class to make expression visualization prettier.
+    instance Show Expr where
+      show e = case e of
+            (V x) -> "V[" ++ x ++ "]"
+            (I n) -> "N[" ++ (show n) ++ "]"
+            (B b) -> "B[" ++ (show b) ++ "]"
+            (Add e1 e2) -> "add("++ (show e1) ++ " , " ++ (show e2) ++ ")"
+            (Mul e1 e2) -> "mul("++ (show e1) ++ " , " ++ (show e2) ++ ")"
+            (Succ e) -> "suc(" ++ (show e) ++ ")"
+            (Pred e) -> "pred(" ++ (show e) ++ ")"
+            (Not e) -> "not(" ++ (show e) ++ ")"
+            (And e1 e2) -> "and["++ (show e1) ++ " , " ++ (show e2) ++ ")"
+            (Or e1 e2) -> "or("++ (show e1) ++ " , " ++ (show e2) ++ ")"
+            (Lt e1 e2) -> "lt("++ (show e1) ++ " , " ++ (show e2) ++ ")"
+            (Gt e1 e2) -> "gt("++ (show e1) ++ " , " ++ (show e2) ++ ")"
+            (Eq e1 e2) -> "eq("++ (show e1) ++ " , " ++ (show e2) ++ ")"
+            (If ec e1 e2) -> "if("++ (show ec) ++ " , " ++ (show e1) ++ " , "
+                           ++ (show e2) ++ ")"
+            (Let x e1 e2) -> "let(" ++ (show e1) ++ " , " ++ (show x) ++ "." ++ (show e2) ++ ")"
 
---3. Función que aplica la sustitución a la expresión dada en caso de ser posible
-  subst :: Expr -> Substitution -> Expr
-  subst (V x) (y, e) = if x==y then e else V x
-  subst (I n) _ = I n
-  subst (B b) _ = B b
-  subst (Add e1 e2) sus = Add (subst e1 sus) (subst e2 sus)
-  subst (Mul e1 e2) sus = Mul (subst e1 sus) (subst e2 sus)
-  subst (Succ e) sus = Succ (subst e sus)
-  subst (Pred e) sus = Pred (subst e sus)
-  subst (Not e) sus = Not (subst e sus)
-  subst (And e1 e2) sus = And (subst e1 sus) (subst e2 sus)
-  subst (Or e1 e2) sus = Or (subst e1 sus) (subst e2 sus)
-  subst (Lt e1 e2) sus = Lt (subst e1 sus) (subst e2 sus)
-  subst (Gt e1 e2) sus = Gt (subst e1 sus) (subst e2 sus)
-  subst (Eq e1 e2) sus = Eq (subst e1 sus) (subst e2 sus)
-  subst (If x e1 e2) sus = If (subst x sus) (subst e1 sus) (subst e2 sus)
-  subst (Let x e1 e2) s@(y, e) = if ( (not (elem x (frVars e))) && (x/=y)) then
-                                    Let x (subst e1 s) (subst e2 s)
-                               else error "No se puede aplicar la sustitucion"
+    -- Defining some semantics
 
---4. Función que determina si dos expresiones son alfa equivalentes.
-  alphaEq :: Expr -> Expr -> Bool
-  alphaEq (V x) (V y) = x == y
-  alphaEq (I n) (I m) = n == m
-  alphaEq (B b) (B d) = b == d
-  alphaEq (Add e1 e2) (Add x1 x2) = (alphaEq e1 x1) && (alphaEq e2 x2)
-  alphaEq (Mul e1 e2) (Mul x1 x2) = (alphaEq e1 x1) && (alphaEq e2 x2)
-  alphaEq (Succ e1) (Succ e2) = alphaEq e1 e2
-  alphaEq (Pred e1) (Pred e2) = alphaEq e1 e2
-  alphaEq (Not e1) (Not e2) = alphaEq e1 e2
-  alphaEq (And e1 e2) (And x1 x2) = (alphaEq e1 x1) && (alphaEq e2 x2)
-  alphaEq (Or e1 e2) (Or x1 x2) = (alphaEq e1 x1) && (alphaEq e2 x2)
-  alphaEq (Lt e1 e2) (Lt x1 x2) = (alphaEq e1 x1) && (alphaEq e2 x2)
-  alphaEq (Gt e1 e2) (Gt x1 x2) = (alphaEq e1 x1) && (alphaEq e2 x2)
-  alphaEq (Eq e1 e2) (Eq x1 x2) = (alphaEq e1 x1) && (alphaEq e2 x2)
-  alphaEq (If x e1 e2) (If y x1 x2) = (alphaEq x y) && (alphaEq e1 x1) && (alphaEq e2 x2)
-  --Este es el caso que nos importa, ya que están las variables ligadas
-  alphaEq (Let x e1 e2) (Let y x1 x2) =
-      if x == y --Si la variable de ligado es la misma, comparamos las expresiones directament
-          then (alphaEq e1 x1) && (alphaEq e2 x2)
-          --Si no son la misma variable de ligado, renombramos las variables de ligado y las ligadas
-          else (alphaEq e1 x1) && (alphaEq (renombra x sus e2) (renombra y sus x2))
-          where sus = max (encuentraSust e2) (encuentraSust x2)
-  alphaEq _ _ = False
+    -- | Variable asignation will be emulated using textual sustitution
+    type Substitution = (Identifier, Expr)
 
---Funciones auxiliares utilizadas para alphaEq
+    -- | Obtaining the free variables from an expression
+    frVars :: Expr -> [Identifier]
+    frVars ex =
+        case ex of
+            (V x) -> [x]
+            (I _) -> []
+            (B _) -> []
+            (Add e f) -> union (frVars e) (frVars f)
+            (Mul e f) -> union (frVars e) (frVars f)
+            (Succ e) -> frVars e
+            (Pred e) -> frVars e
+            (Not e) -> frVars e
+            (And e f) -> union (frVars e) (frVars f)
+            (Or e f) -> union (frVars e) (frVars f)
+            (Lt e f) -> union (frVars e) (frVars f)
+            (Gt e f) -> union (frVars e) (frVars f)
+            (Eq e f) -> union (frVars e) (frVars f)
+            (If e f g) -> union (union (frVars e) (frVars f)) (frVars g)
+            (Let i e f) -> union (frVars e) ((frVars f) \\ [i])
 
-  -- Función que obtiene los nombres de las variables en una expresión
-  varsF :: Expr -> [String]
-  varsF (V x) = [x]
-  varsF (I _) = []
-  varsF (B _) = []
-  varsF (Add e1 e2) =  union (varsF e1) (varsF e2)
-  varsF (Mul e1 e2) =  union (varsF e1) (varsF e2)
-  varsF (Succ e)=  varsF e
-  varsF (Pred e)=  varsF e
-  varsF (Not e)=  varsF e
-  varsF (And e1 e2) =  union (varsF e1) (varsF e2)
-  varsF (Or e1 e2) =  union (varsF e1) (varsF e2)
-  varsF (Lt e1 e2) =  union (varsF e1) (varsF e2)
-  varsF (Gt e1 e2) =  union (varsF e1) (varsF e2)
-  varsF (Eq e1 e2) =  union (varsF e1) (varsF e2)
-  varsF (If x e1 e2) =  union (union (varsF e1) (varsF e2)) (varsF x)
-  varsF (Let x e1 e2) =  union (varsF e1) (union (varsF e2) [x])
+    -- | Applying subtition if semantically possible
+    subst :: Expr -> Substitution -> Expr
+    subst ex s =
+        case ex of
+            (V x) ->
+                if x == y then r else ex
+                where (y, r) = s
+            (I _) -> ex
+            (B _) -> ex
+            (Add e f) -> Add (st e) (st f)
+            (Mul e f) -> Mul (st e) (st f)
+            (Succ e) -> Succ (st e)
+            (Pred e) -> Pred (st e)
+            (Not e) -> Not (st e)
+            (And e f) -> And (st e) (st f)
+            (Or e f) -> Or (st e) (st f)
+            (Lt e f) -> Lt (st e) (st f)
+            (Gt e f) -> Gt (st e) (st f)
+            (Eq e f) -> Eq (st e) (st f)
+            (If e f g) -> If (st e) (st f) (st g)
+            (Let i e f) ->
+                if i /= j && not (elem i (frVars r))
+                    then Let i (st e) (st f)
+                    else let i' = safeName f in (Let i' e (subst f (i, V i')))
 
-  --Función que renombra las variables de una expresión
-  renombra :: String -> String -> Expr -> Expr
-  renombra sus1 sus2 (V x) = if x == sus1 then (V sus2) else V x
-  renombra _ _ (I n) = I n
-  renombra _ _ (B b) = B b
-  renombra sus1 sus2 (Add e1 e2) = Add (renombra sus1 sus2 e1) (renombra sus1 sus2 e2)
-  renombra sus1 sus2 (Mul e1 e2) = Mul (renombra sus1 sus2 e1) (renombra sus1 sus2 e2)
-  renombra sus1 sus2 (Succ e) = Succ (renombra sus1 sus2 e)
-  renombra sus1 sus2 (Pred e) = Pred (renombra sus1 sus2 e)
-  renombra sus1 sus2 (Not e) = Not (renombra sus1 sus2 e)
-  renombra sus1 sus2 (And e1 e2) = And (renombra sus1 sus2 e1) (renombra sus1 sus2 e2)
-  renombra sus1 sus2 (Or e1 e2) = Or (renombra sus1 sus2 e1) (renombra sus1 sus2 e2)
-  renombra sus1 sus2 (Lt e1 e2) = Lt (renombra sus1 sus2 e1) (renombra sus1 sus2 e2)
-  renombra sus1 sus2 (Gt e1 e2) = Gt (renombra sus1 sus2 e1) (renombra sus1 sus2 e2)
-  renombra sus1 sus2 (Eq e1 e2) = Eq (renombra sus1 sus2 e1) (renombra sus1 sus2 e2)
-  renombra sus1 sus2 (If x e1 e2) = If (renombra sus1 sus2 x) (renombra sus1 sus2 e1) (renombra sus1 sus2 e2)
-  renombra sus1 sus2 (Let x e1 e2) = Let y (renombra sus1 sus2 e1) (renombra sus1 sus2 e2)
-                                  where y = if x == sus1 then sus2 else y
+                where (j, r) = s
+        where st = (flip subst) s
 
-  --Función que sirve para encontrar una variable nueva
-  encuentraSust :: Expr -> String
-  encuentraSust e = (foldr (\ x xs -> if length x > length xs then x else xs) "" (varsF e)) ++ "'"
+    -- | Determining if two expressions are alpha-equivalent
+    alphaEq :: Expr -> Expr -> Bool
+    alphaEq (V x) (V y) = x == y
+    alphaEq (I n) (I m) = n == m
+    alphaEq (B p) (B q) = p == q
+    alphaEq (Add e f) (Add g h) = (alphaEq e g) && (alphaEq f h)
+    alphaEq (Mul e f) (Mul g h) = (alphaEq e g) && (alphaEq f h)
+    alphaEq (Succ e) (Succ f) = alphaEq e f
+    alphaEq (Pred e) (Pred f) = alphaEq e f
+    alphaEq (Not e) (Not f) = alphaEq e f
+    alphaEq (And e f) (And g h) = (alphaEq e g) && (alphaEq f h)
+    alphaEq (Or e f) (Or g h) = (alphaEq e g) && (alphaEq f h)
+    alphaEq (Lt e f) (Lt g h) = (alphaEq e g) && (alphaEq f h)
+    alphaEq (Gt e f) (Gt g h) = (alphaEq e g) && (alphaEq f h)
+    alphaEq (Eq e f) (Eq g h) = (alphaEq e g) && (alphaEq f h)
+    alphaEq (If e f g) (If h i j) = (alphaEq e h) && (alphaEq f i) && (alphaEq g j)
+    alphaEq (Let i e f) (Let j g h) =
+        if i == j
+            then (alphaEq e g) && (alphaEq f h)
+            else (alphaEq e g) && (alphaEq (rename i s f) (rename j s h))
+        where s = max (safeName f) (safeName h)
+    alphaEq _ _ = False
+
+    -- | Renames a variable in an expression
+    rename :: String -> String -> Expr -> Expr
+    rename s1 s2 ex =
+        case ex of
+            (V x) -> if x == s1 then (V s2) else ex
+            (I _) -> ex
+            (B _) -> ex
+            (Add e f) -> Add (r e) (r f)
+            (Mul e f) -> Mul (r e) (r f)
+            (Succ e) -> Succ (r e)
+            (Pred e) -> Pred (r e)
+            (Not e) -> Not (r e)
+            (And e f) -> And (r e) (r f)
+            (Or e f) -> Or (r e) (r f)
+            (Lt e f) -> Lt (r e) (r f)
+            (Gt e f) -> Gt (r e) (r f)
+            (Eq e f) -> Eq (r e) (r f)
+            (If e f g) -> If (r e) (r f) (r g)
+            (Let i e f) -> Let j (r e) (r f)
+                where j = if i == s1 then s2 else i
+        where r = rename s1 s2
+
+
+    -- | Given an expression, find a variable name that is no currently in the
+    -- expression.
+    safeName :: Expr -> String
+    safeName ex = (foldr (max) "" (vars ex)) ++ "'"
+
+    -- | Get all the variable names in an expression.
+    vars :: Expr -> [String]
+    vars ex =
+        case ex of
+            (V x) -> [x]
+            (I _) -> []
+            (B _) -> []
+            (Add e f) -> union (vars e) (vars f)
+            (Mul e f) -> union (vars e) (vars f)
+            (Succ e) -> vars e
+            (Pred e) -> vars e
+            (Not e) -> vars e
+            (And e f) -> union (vars e) (vars f)
+            (Or e f) -> union (vars e) (vars f)
+            (Lt e f) -> union (vars e) (vars f)
+            (Gt e f) -> union (vars e) (vars f)
+            (Eq e f) -> union (vars e) (vars f)
+            (If e f g) -> union (union (vars e) (vars f)) (vars g)
+            (Let i e f) -> union (union (vars e) (vars f)) [i]

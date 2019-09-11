@@ -11,9 +11,9 @@ module BAE.Semantic where
   eval1 :: Expr -> Expr
   eval1 expr =
     case expr of
-      I n -> error "blocked state"
-      B p -> error "blocked state"
-      V x -> error "blocked state"
+      I n -> error "blocked state: integer"
+      B p -> error "blocked state: boolean"
+      V x -> error "blocked state: variable"
       Add (I n) (I m) -> I (n + m)
       Add (I n) e -> let e' = eval1 e in Add (I n) e'
       Add e1 e2 -> let e1' = eval1 e1 in Add e1' e2
@@ -22,7 +22,7 @@ module BAE.Semantic where
       Mul e1 e2 -> let e1' = eval1 e1 in Mul e1' e2
       Succ (I n) -> I (n + 1)
       Succ e -> Succ (eval1 e)
-      Pred (I 0) -> error "blocked state"
+      Pred (I 0) -> I 0
       Pred (I n) -> I (n - 1)
       Pred e -> Pred (eval1 e)
       Not (B p) -> B (not p)
@@ -48,15 +48,47 @@ module BAE.Semantic where
       Let i (B p) e2 -> subst e2 (i, (B p))
       Let i e1 e2 -> Let i (eval1 e1) e2
 
+  blocked :: Expr -> Expr
+  blocked expr =
+    case expr of
+      I n -> True
+      B p -> True
+      V x -> True
+      Add (I n) (I m) -> False
+      Add e1 e2 -> (blocked e1) && (blocked e2)
+      Mul (I n) (I m) -> False
+      Mul e1 e2 -> (blocked e1) && (blocked e2)
+      Succ (I n) -> False
+      Succ e -> blocked e1
+      Pred (I n) -> False
+      Pred e -> blocked e
+      Not (B p) -> False
+      Not e -> blocked e
+      And (B p) (B q) -> False
+      And e1 e2 -> (blocked e1) && (blocked e2)
+      Or (B p) (B q) -> False
+      Or e1 e2 -> (blocked e1) && (blocked e2)
+      Lt (I n) (I m) -> False
+      Lt e1 e2 -> (blocked e1) && (blocked e2)
+      Gt (I n) (I m) -> False
+      Gt e1 e2 -> (blocked e1) && (blocked e2)
+      Eq (I n) (I m) -> False
+      Eq e1 e2 -> (blocked e1) && (blocked e2)
+      If (B q) e1 e2 -> (blocked e1) && (blocked e2)
+      If e1 e2 e3 -> If (eval1 e1) e2 e3
+      Let i (I n) e2 -> blocked (subst e2 (i, (I n)))
+      Let i (B p) e2 -> blocked (subst e2 (i, (B p)))
+      Let i e1 e2 -> Let i (eval1 e1) e2
+
   evals :: Expr -> Expr
   evals expr =
-    case expr of
-      I n -> I n
-      B p -> B p
-      e -> evals (eval1 e)
+    let expr' = eval1 expr in
+      if expr == expr'
+        then expr
+        else evals (expr')
 
   evale :: Expr -> Expr
-  evale ex = 
+  evale ex =
     case evals ex of
       I n -> I n
       B p -> B p
