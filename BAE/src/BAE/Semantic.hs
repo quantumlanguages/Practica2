@@ -48,51 +48,70 @@ module BAE.Semantic where
       Let i (B p) e2 -> subst e2 (i, (B p))
       Let i e1 e2 -> Let i (eval1 e1) e2
 
-  blocked :: Expr -> Expr
+  blocked :: Expr -> Bool
   blocked expr =
     case expr of
       I n -> True
       B p -> True
       V x -> True
-      Add (I n) (I m) -> False
-      Add e1 e2 -> (blocked e1) && (blocked e2)
-      Mul (I n) (I m) -> False
-      Mul e1 e2 -> (blocked e1) && (blocked e2)
-      Succ (I n) -> False
-      Succ e -> blocked e1
+      Add (I _) (I _) -> False
+      Add (I _) e -> blocked e
+      Add e1 e2 -> blocked e1
+      Mul (I _) (I _) -> False
+      Mul (I _) e -> blocked e
+      Mul e1 e2 -> blocked e1
+      Succ (I _) -> False
+      Succ e -> blocked e
+      Pred (I 0) -> False
       Pred (I n) -> False
       Pred e -> blocked e
       Not (B p) -> False
       Not e -> blocked e
       And (B p) (B q) -> False
-      And e1 e2 -> (blocked e1) && (blocked e2)
+      And (B p) e -> blocked e
+      And e1 e2 -> blocked e1
       Or (B p) (B q) -> False
-      Or e1 e2 -> (blocked e1) && (blocked e2)
+      Or (B p) e -> blocked e
+      Or e1 e2 -> blocked e1
       Lt (I n) (I m) -> False
-      Lt e1 e2 -> (blocked e1) && (blocked e2)
+      Lt (I n) e -> blocked e
+      Lt e1 e2 -> blocked e1
       Gt (I n) (I m) -> False
-      Gt e1 e2 -> (blocked e1) && (blocked e2)
+      Gt (I n) e -> blocked e
+      Gt e1 e2 -> blocked e1
       Eq (I n) (I m) -> False
-      Eq e1 e2 -> (blocked e1) && (blocked e2)
-      If (B q) e1 e2 -> (blocked e1) && (blocked e2)
-      If e1 e2 e3 -> If (eval1 e1) e2 e3
-      Let i (I n) e2 -> blocked (subst e2 (i, (I n)))
-      Let i (B p) e2 -> blocked (subst e2 (i, (B p)))
-      Let i e1 e2 -> Let i (eval1 e1) e2
+      Eq (I n) e -> blocked e
+      Eq e1 e2 -> blocked e1
+      If (B q) e1 e2 -> False
+      If e1 e2 e3 -> blocked e1
+      Let i (I n) e2 -> False
+      Let i (B p) e2 -> False
+      Let i e1 e2 -> blocked e1
 
   evals :: Expr -> Expr
   evals expr =
-    let expr' = eval1 expr in
-      if expr == expr'
-        then expr
-        else evals (expr')
+    if blocked expr
+      then expr
+      else evals (eval1 expr)
 
   evale :: Expr -> Expr
   evale ex =
     case evals ex of
       I n -> I n
       B p -> B p
-      _ -> error "Evaluation failed"
+      V x -> error "[Var] Unasigned variable"
+      Add _ _ -> error "[Add] Expected two Integer"
+      Mul _ _ -> error "[Mul] Expected two Integer"
+      Succ _ -> error "[Succ] Expected one Integer"
+      Pred _ -> error "[Pred] Expected one Integer"
+      Not _ -> error "[Not] Expected one Boolean"
+      And _ _ -> error "[And] Expected two Boolean"
+      Or _ _ -> error "[Or] Expected two Boolean"
+      Lt _ _ -> error "[Lt] Expected two Integer"
+      Gt _ _ -> error "[Gt] Expected two Integer"
+      Eq _ _ -> error "[Eq] Expected two Integer"
+      If _ _ _ -> error "[If] Expected one Boolean as first argument"
+      Let i e1 e2 -> error "[Let] Expected one value as variable asigment"
 
   vt :: Ctx -> Expr -> Type -> Bool
   vt ctx (V i) t = searchDecl ctx i t
@@ -131,4 +150,4 @@ module BAE.Semantic where
   eval e t =
     if vt [] e t
       then evals e
-      else error "incorrect type"
+      else error "Type Error"
